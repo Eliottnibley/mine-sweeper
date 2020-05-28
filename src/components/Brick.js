@@ -17,11 +17,20 @@ class Brick extends Component {
       )
     }
     else {
-      return (
-        <div className='box'>
-          {this.props.contents}
-        </div>
-      )
+      if (this.props.contents ==='m'){
+        return (
+          <div className='box'>
+           <div className='mine'></div>
+          </div>
+        )
+      }
+      else {
+        return (
+          <div className='box'>
+            {this.props.contents}
+          </div>
+        )
+      }
     }
   }
 }
