@@ -45,49 +45,49 @@ class App extends Component {
     this.setState({hitMine: !this.state.hitMine})
   }
 
-  placeMines (boxesArray) {
-    let mines = this.state.mines
-    let minesArray = []
+  // placeMines (boxesArray) {
+  //   let mines = this.state.mines
+  //   let minesArray = []
 
-    for (let i = 0; i < boxesArray.length; i++) {
-      let count = 0;
-      if (mines.includes(boxesArray[i])){
-        minesArray[i] = 'm'
-      }
-      else {
-        if (mines.includes(boxesArray[i-this.state.gameHeight-1])){
-          count++
-        }
-        if (mines.includes(boxesArray[i-this.state.gameHeight])){
-          count++
-        }
-        if (mines.includes(boxesArray[i-this.state.gameHeight+1])){
-          count++
-        }
-        if (mines.includes(boxesArray[i-1])){
-          count++
-        }
-        if (mines.includes(boxesArray[i+1])){
-          count++
-        }
-        if (mines.includes(boxesArray[i+this.state.gameHeight-1])){
-          count++
-        }
-        if (mines.includes(boxesArray[i+this.state.gameHeight])){
-          count++
-        }
-        if (mines.includes(boxesArray[i+this.state.gameHeight+1])){
-          count++
-        }
-        minesArray[i] = count
+  //   for (let i = 0; i < boxesArray.length; i++) {
+  //     let count = 0;
+  //     if (mines.includes(boxesArray[i])){
+  //       minesArray[i] = 'm'
+  //     }
+  //     else {
+  //       if (mines.includes(boxesArray[i-this.state.gameHeight-1])){
+  //         count++
+  //       }
+  //       if (mines.includes(boxesArray[i-this.state.gameHeight])){
+  //         count++
+  //       }
+  //       if (mines.includes(boxesArray[i-this.state.gameHeight+1])){
+  //         count++
+  //       }
+  //       if (mines.includes(boxesArray[i-1])){
+  //         count++
+  //       }
+  //       if (mines.includes(boxesArray[i+1])){
+  //         count++
+  //       }
+  //       if (mines.includes(boxesArray[i+this.state.gameHeight-1])){
+  //         count++
+  //       }
+  //       if (mines.includes(boxesArray[i+this.state.gameHeight])){
+  //         count++
+  //       }
+  //       if (mines.includes(boxesArray[i+this.state.gameHeight+1])){
+  //         count++
+  //       }
+  //       minesArray[i] = count
 
-        if (minesArray[i] === 0){
-          minesArray[i] = ' '
-        }
-      }
-    }
-    return minesArray
-  }
+  //       if (minesArray[i] === 0){
+  //         minesArray[i] = ' '
+  //       }
+  //     }
+  //   }
+  //   return minesArray
+  // }
 
   newGame (boxesArray) {
     this.randomMines(boxesArray)
@@ -125,7 +125,7 @@ class App extends Component {
 
   toggleHidden (contents, array, index) {
     if (contents === 'flag'){
-      
+
     }
     else {
       if (contents[index] === 'm'){
