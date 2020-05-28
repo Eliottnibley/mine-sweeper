@@ -17,7 +17,8 @@ class App extends Component {
       gameHeight: 20,
       mines: [],
       minesFlagged: 0,
-      hidden: []
+      hidden: [],
+      flags: []
     }
 
     this.toggleFlag = this.toggleFlag.bind(this)
@@ -25,6 +26,7 @@ class App extends Component {
     this.clearBlanks = this.clearBlanks.bind(this)
     this.toggleHidden = this.toggleHidden.bind(this)
     this.noToggleHidden = this.noToggleHidden.bind(this)
+    this.placeFlag = this.placeFlag.bind(this)
   }
 
   toggleFlag() {
@@ -80,7 +82,7 @@ class App extends Component {
         minesArray[i] = count
 
         if (minesArray[i] === 0){
-          minesArray[i] = ''
+          minesArray[i] = ' '
         }
       }
     }
@@ -94,6 +96,7 @@ class App extends Component {
       hiddenArray[i] = true
     }
     this.setState({hidden: hiddenArray})
+    this.setState({flags: []})
     this.setState({hitMine: false})
   }
 
@@ -105,19 +108,39 @@ class App extends Component {
 
   }
 
-  toggleHidden (contents, array, index) {
-    if (contents[index] === 'm'){
-      this.setState({hitMine: true})
+  placeFlag (contents, array, index){
+    if (array[index] === true){
+      let flags = this.state.flags.slice()
+      if (this.state.flags.includes(index)){
+        let ind = flags.indexOf(index)
+        flags.splice(ind, 1)
+      }
+      else {
+        flags.push(index)
+      }
+      console.log(flags)
+      this.setState({flags: flags})
     }
-    let newHidden = this.clearBlanks(contents, array, index)
-    this.setState({hidden: newHidden})
+  }
+
+  toggleHidden (contents, array, index) {
+    if (contents === 'flag'){
+      
+    }
+    else {
+      if (contents[index] === 'm'){
+        this.setState({hitMine: true})
+      }
+      let newHidden = this.clearBlanks(contents, array, index)
+      this.setState({hidden: newHidden})
+    }
   }
 
   clearBlanks (contents, array, index) {
     if (array[index] === false){
       return array
     }
-    if(contents[index] === ''){
+    if(contents[index] === ' '){
       array[index] = false
       if (index >= this.state.gameHeight){
         array = this.clearBlanks(contents, array, index - this.state.gameHeight)
@@ -166,14 +189,28 @@ class App extends Component {
       )
     }
     else {
-      if (!this.state.hitMine){
+      if (this.state.hitMine){
         return (
           <div className='App'>
             <div className='game'>
               <Header hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
               <div className='grid-container'>
                 {contentsArray.map((elem, ind) => {
-                  return <Brick hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.toggleHidden} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
+                  return <Brick flags={this.state.flags} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.noToggleHidden} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
+                })}
+              </div>
+            </div>
+          </div>
+        )
+      }
+      else if (this.state.flagOn){
+        return (
+          <div className='App'>
+            <div className='game'>
+              <Header hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
+              <div className='grid-container'>
+                {contentsArray.map((elem, ind) => {
+                  return <Brick flags={this.state.flags} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.placeFlag} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
                 })}
               </div>
             </div>
@@ -187,7 +224,7 @@ class App extends Component {
               <Header hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
               <div className='grid-container'>
                 {contentsArray.map((elem, ind) => {
-                  return <Brick hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.noToggleHidden} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
+                  return <Brick flags={this.state.flags} flagOn={this.state.flagOn} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.toggleHidden} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
                 })}
               </div>
             </div>

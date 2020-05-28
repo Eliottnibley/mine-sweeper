@@ -9,12 +9,25 @@ class Brick extends Component {
   }
 
   render() {
+    let flagInd = ''
+    if (this.props.flags.includes(this.props.index)){
+      flagInd = 'flag'
+    }
     if (this.props.hidden === true){
-      return (
-        <div onClick={() => this.props.toggleHidden(this.props.contentsArray, this.props.hiddenArray, this.props.index)} className='boxhidden'>
-          
-        </div>
-      )
+      if (!this.props.flags.includes(this.props.index)){
+        return (
+          <div onClick={() => this.props.toggleHidden(this.props.contentsArray, this.props.hiddenArray, this.props.index)} className={`boxhidden${flagInd}`}>
+            
+          </div>
+        )
+      }
+      else {
+        return (
+          <div onClick={() => this.props.toggleHidden('flag', this.props.hiddenArray, this.props.index)} className={`boxhidden${flagInd}`}>
+            
+          </div>
+        )
+      }
     }
     else {
       if (this.props.contents ==='m'){

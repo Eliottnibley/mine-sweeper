@@ -104,6 +104,14 @@
   background-color: rgb(145, 145, 145);
 }
 
+.boxhiddenflag {
+  width: 19.5px;
+  height: 19.5px;
+  margin: 0.2px;
+  background-color: rgb(41, 207, 0);
+  border: 0.5px solid rgb(110, 110, 110);
+}
+
 .mine {
   height: 100%;
   width: 100%;
