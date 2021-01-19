@@ -8,6 +8,33 @@ class Brick extends Component {
     }
   }
 
+  contentColor = () => {
+    const {contents} = this.props
+    switch (contents) {
+      case 1: 
+        return 'blue'
+      case 2: 
+        return 'green'
+      case 3: 
+        return 'red'
+      case 4: 
+        return 'navy'
+      case 5: 
+        return 'maroon'
+      case 6: 
+        return 'teal'
+      case 7: 
+        return 'purple'
+      case 8: 
+        return 'black'
+      case 'm': 
+        return ''
+      default:
+        return 'black'
+    }
+
+  }
+
   render() {
     let flagInd = ''
     if (this.props.flags.includes(this.props.index)){
@@ -39,7 +66,7 @@ class Brick extends Component {
       }
       else {
         return (
-          <div className='box'>
+          <div className='box' style={{color: this.contentColor()}}>
             {this.props.contents}
           </div>
         )

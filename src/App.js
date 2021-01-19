@@ -8,25 +8,27 @@ class App extends Component {
   constructor () {
     super()
     this.state = {
+      difficulty: 'medium',
       hitMine: false,
       isSetup: false,
       flagOn: false,
-      numMines: 60,
+      numMines: 10,
       userInput: '',
-      gamewidth: 25,
-      gameHeight: 20,
+      gameHeight: 40,
+      gameWidth: 50,
       mines: [],
       minesFlagged: 0,
       hidden: [],
-      flags: []
+      flags: [],
+      wonGame: false
     }
 
     this.toggleFlag = this.toggleFlag.bind(this)
     this.newGame = this.newGame.bind(this)
     this.clearBlanks = this.clearBlanks.bind(this)
     this.toggleHidden = this.toggleHidden.bind(this)
-    this.noToggleHidden = this.noToggleHidden.bind(this)
     this.placeFlag = this.placeFlag.bind(this)
+    this.toggleSetup = this.toggleSetup.bind(this)
   }
 
   toggleFlag() {
@@ -45,49 +47,59 @@ class App extends Component {
     this.setState({hitMine: !this.state.hitMine})
   }
 
-  // placeMines (boxesArray) {
-  //   let mines = this.state.mines
-  //   let minesArray = []
+  placeMines (boxesArray) {
+    let mines = this.state.mines
+    let minesArray = []
 
-  //   for (let i = 0; i < boxesArray.length; i++) {
-  //     let count = 0;
-  //     if (mines.includes(boxesArray[i])){
-  //       minesArray[i] = 'm'
-  //     }
-  //     else {
-  //       if (mines.includes(boxesArray[i-this.state.gameHeight-1])){
-  //         count++
-  //       }
-  //       if (mines.includes(boxesArray[i-this.state.gameHeight])){
-  //         count++
-  //       }
-  //       if (mines.includes(boxesArray[i-this.state.gameHeight+1])){
-  //         count++
-  //       }
-  //       if (mines.includes(boxesArray[i-1])){
-  //         count++
-  //       }
-  //       if (mines.includes(boxesArray[i+1])){
-  //         count++
-  //       }
-  //       if (mines.includes(boxesArray[i+this.state.gameHeight-1])){
-  //         count++
-  //       }
-  //       if (mines.includes(boxesArray[i+this.state.gameHeight])){
-  //         count++
-  //       }
-  //       if (mines.includes(boxesArray[i+this.state.gameHeight+1])){
-  //         count++
-  //       }
-  //       minesArray[i] = count
+    for (let i = 0; i < boxesArray.length; i++) {
+      let count = 0;
+      if (mines.includes(boxesArray[i])){
+        minesArray[i] = 'm'
+      }
+      else {
+        if (mines.includes(boxesArray[i-this.state.gameWidth-1])  && i % this.state.gameWidth != 0){
+          count++
+        }
+        if (mines.includes(boxesArray[i-this.state.gameWidth])){
+          count++
+        }
+        if (mines.includes(boxesArray[i-this.state.gameWidth+1])  && (i + 1) % this.state.gameWidth != 0){
+          count++
+        }
+        if (mines.includes(boxesArray[i-1]) && i % this.state.gameWidth != 0){
+          count++
+        }
+        if (mines.includes(boxesArray[i+1]) && (i + 1) % this.state.gameWidth != 0){
+          count++
+        }
+        if (mines.includes(boxesArray[i+this.state.gameWidth-1])  && i % this.state.gameWidth != 0){
+          count++
+        }
+        if (mines.includes(boxesArray[i+this.state.gameWidth])){
+          count++
+        }
+        if (mines.includes(boxesArray[i+this.state.gameWidth+1])  && (i + 1) % this.state.gameWidth != 0){
+          count++
+        }
+        minesArray[i] = count
 
-  //       if (minesArray[i] === 0){
-  //         minesArray[i] = ' '
-  //       }
-  //     }
-  //   }
-  //   return minesArray
-  // }
+        if (minesArray[i] === 0){
+          minesArray[i] = ' '
+        }
+      }
+    }
+    return minesArray
+  }
+
+  gameWon = () => {
+    let hiddenArray = []
+    for (let i = 0; i < this.state.hidden.length; i++){
+      hiddenArray[i] = false
+    }
+
+    this.setState({hidden: hiddenArray})
+    this.setState({wonGame: true})
+  }
 
   newGame (boxesArray) {
     this.randomMines(boxesArray)
@@ -95,17 +107,25 @@ class App extends Component {
     for (let i = 0; i < boxesArray.length; i++){
       hiddenArray[i] = true
     }
+
     this.setState({hidden: hiddenArray})
     this.setState({flags: []})
     this.setState({hitMine: false})
+    this.setState({minesFlagged: 0})
+    this.setState({wonGame: false})
   }
 
   minesFlagged () {
     this.setState({minesFlagged: this.state.minesFlagged - 1})
   }
 
-  noToggleHidden (contents, array, index){
-
+  flagsCorrect = () => {
+    for (let i = 0; i < this.state.mines.length; i++) {
+      if (!this.state.flags.includes(this.state.mines[i])) {
+        return false
+      }
+    }
+    return true
   }
 
   placeFlag (contents, array, index){
@@ -114,11 +134,16 @@ class App extends Component {
       if (this.state.flags.includes(index)){
         let ind = flags.indexOf(index)
         flags.splice(ind, 1)
+        this.setState({minesFlagged: this.state.minesFlagged - 1})
       }
       else {
+        if(this.state.flags.length >= this.state.numMines) {
+          return
+        }
         flags.push(index)
+        this.setState({minesFlagged: this.state.minesFlagged + 1})
       }
-      console.log(flags)
+      
       this.setState({flags: flags})
     }
   }
@@ -132,7 +157,14 @@ class App extends Component {
         this.setState({hitMine: true})
       }
       let newHidden = this.clearBlanks(contents, array, index)
-      this.setState({hidden: newHidden})
+      let flagArray = []
+      for (let i = 0; i < this.state.flags.length; i ++) {
+        if (this.state.hidden[this.state.flags[i]]) {
+          flagArray.push(this.state.flags[i])
+        }
+      }
+
+      this.setState({hidden: newHidden, flags: flagArray, minesFlagged: flagArray.length})
     }
   }
 
@@ -142,16 +174,16 @@ class App extends Component {
     }
     if(contents[index] === ' '){
       array[index] = false
-      if (index >= this.state.gameHeight){
-        array = this.clearBlanks(contents, array, index - this.state.gameHeight)
+      if (index >= this.state.gameWidth){
+        array = this.clearBlanks(contents, array, index - this.state.gameWidth)
       }
-      if (index < this.state.gameHeight*this.state.gamewidth - this.state.gameHeight){
-        array = this.clearBlanks(contents, array, index + this.state.gameHeight)
+      if (index < this.state.gameWidth*this.state.gameHeight - this.state.gameWidth){
+        array = this.clearBlanks(contents, array, index + this.state.gameWidth)
       }
-      if (index % this.state.gameHeight !== 0){
+      if (index % this.state.gameWidth !== 0){
         array = this.clearBlanks(contents, array, index - 1)
       }
-      if (index % this.state.gameHeight !== this.state.gameHeight -1){
+      if (index % this.state.gameWidth !== this.state.gameWidth -1){
         array = this.clearBlanks(contents, array, index + 1)
       }
       return array
@@ -162,8 +194,31 @@ class App extends Component {
     }
   }
 
+  genColumns = () => {
+    let autoStr = ''
+
+    for (let i = 0; i < this.state.gameWidth; i++) {
+      autoStr += 'auto '
+    }
+
+    return autoStr
+  }
+
+  toggleSetup = () => {
+    console.log(this.state.isSetup)
+    if (!this.state.isSetup) {
+      console.log(document.getElementsByClassName(this.state.difficulty))
+      document.getElementsByClassName(this.state.difficulty)
+    }
+    this.setState({isSetup: !this.state.isSetup})
+  }
+
+  changeSettings = (difficulty) => {
+    
+  }
+
   render () {
-    let numBoxes = this.state.gameHeight * this.state.gamewidth
+    let numBoxes = this.state.gameWidth * this.state.gameHeight
     let boxesArray = []
     for (let i = 0; i < numBoxes; i++){
       boxesArray[i]  = i
@@ -179,11 +234,33 @@ class App extends Component {
       flag = 'off'
     }
 
+
+    if (this.flagsCorrect() && !this.state.wonGame) {
+      this.gameWon()
+    }
+
     if (this.state.isSetup){
       return (
         <div className='App'>
-          <div className='game'>
-
+          <div className='setup-menu'>
+            <h2>Game Options</h2>
+            <span>
+              <p>Easy</p>
+              <input className='easy' type='checkbox' onClick={() => this.changeSettings('easy')}></input>
+            </span>
+            <span>
+              <p>Medium</p>
+              <input className='medium' type='checkbox' onClick={() => this.changeSettings('medium')}></input>
+            </span>
+            <span>
+              <p>Hard</p>
+              <input className='hard' type='checkbox' onClick={() => this.changeSettings('hard')}></input>
+            </span>
+            <span>
+              <p>Custom</p>
+              <input className='custom' type='checkbox' onClick={() => this.changeSettings('custom')}></input>
+            </span>
+            {}
           </div>
         </div>
       )
@@ -193,8 +270,8 @@ class App extends Component {
         return (
           <div className='App'>
             <div className='game'>
-              <Header hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
-              <div className='grid-container'>
+              <Header toggleSetup={this.toggleSetup} wonGame={this.state.wonGame} hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
+              <div className='grid-container' style={{'display': 'grid', 'grid-template-columns': this.genColumns()}}>
                 {contentsArray.map((elem, ind) => {
                   return <Brick flags={this.state.flags} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.noToggleHidden} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
                 })}
@@ -207,8 +284,8 @@ class App extends Component {
         return (
           <div className='App'>
             <div className='game'>
-              <Header hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
-              <div className='grid-container'>
+              <Header toggleSetup={this.toggleSetup} wonGame={this.state.wonGame} hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
+              <div className='grid-container'  style={{'display': 'grid', 'grid-template-columns': this.genColumns()}}>
                 {contentsArray.map((elem, ind) => {
                   return <Brick flags={this.state.flags} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.placeFlag} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
                 })}
@@ -221,8 +298,8 @@ class App extends Component {
         return (
           <div className='App'>
             <div className='game'>
-              <Header hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
-              <div className='grid-container'>
+              <Header toggleSetup={this.toggleSetup} wonGame={this.state.wonGame} hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
+              <div className='grid-container'  style={{'display': 'grid', 'grid-template-columns': this.genColumns()}}>
                 {contentsArray.map((elem, ind) => {
                   return <Brick flags={this.state.flags} flagOn={this.state.flagOn} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.toggleHidden} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
                 })}
