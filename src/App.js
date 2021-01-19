@@ -12,10 +12,10 @@ class App extends Component {
       hitMine: false,
       isSetup: false,
       flagOn: false,
-      numMines: 10,
+      numMines: 50,
       userInput: '',
-      gameHeight: 40,
-      gameWidth: 50,
+      gameHeight: 20,
+      gameWidth: 30,
       mines: [],
       minesFlagged: 0,
       hidden: [],
@@ -113,6 +113,7 @@ class App extends Component {
     this.setState({hitMine: false})
     this.setState({minesFlagged: 0})
     this.setState({wonGame: false})
+
   }
 
   minesFlagged () {
@@ -149,6 +150,9 @@ class App extends Component {
   }
 
   toggleHidden (contents, array, index) {
+    if (this.state.hitMine) {
+      return
+    }
     if (contents === 'flag'){
 
     }
@@ -205,16 +209,42 @@ class App extends Component {
   }
 
   toggleSetup = () => {
-    console.log(this.state.isSetup)
     if (!this.state.isSetup) {
-      console.log(document.getElementsByClassName(this.state.difficulty))
-      document.getElementsByClassName(this.state.difficulty)
+      document.getElementById(this.state.difficulty).click()
     }
+
     this.setState({isSetup: !this.state.isSetup})
   }
 
   changeSettings = (difficulty) => {
-    
+    document.getElementById('easy').checked = false
+    document.getElementById('medium').checked = false
+    document.getElementById('hard').checked = false
+
+    document.getElementById(difficulty).checked = true
+
+    let numBoxes = 0
+
+    if (difficulty === 'easy') {
+      this.setState({gameHeight: 15, gameWidth: 15, numMines: 10})
+      numBoxes = 15 * 15
+    }
+    else if (difficulty === 'medium') {
+      numBoxes = 20*30
+      this.setState({gameHeight: 20, gameWidth: 30, numMines: 50})
+    }
+    else {
+      numBoxes = 35 * 40
+      this.setState({gameHeight: 35, gameWidth: 40, numMines: 200})
+    }
+
+    let boxesArray = []
+    for (let i = 0; i < numBoxes; i++){
+      boxesArray[i]  = i
+    }
+    this.newGame(boxesArray)
+
+    this.setState({difficulty: difficulty})
   }
 
   render () {
@@ -239,75 +269,92 @@ class App extends Component {
       this.gameWon()
     }
 
-    if (this.state.isSetup){
+    if (this.state.hitMine){
       return (
         <div className='App'>
-          <div className='setup-menu'>
-            <h2>Game Options</h2>
-            <span>
-              <p>Easy</p>
-              <input className='easy' type='checkbox' onClick={() => this.changeSettings('easy')}></input>
-            </span>
-            <span>
-              <p>Medium</p>
-              <input className='medium' type='checkbox' onClick={() => this.changeSettings('medium')}></input>
-            </span>
-            <span>
-              <p>Hard</p>
-              <input className='hard' type='checkbox' onClick={() => this.changeSettings('hard')}></input>
-            </span>
-            <span>
-              <p>Custom</p>
-              <input className='custom' type='checkbox' onClick={() => this.changeSettings('custom')}></input>
-            </span>
-            {}
+          <div className='game'>
+            <Header toggleSetup={this.toggleSetup} wonGame={this.state.wonGame} hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
+            <div className='grid-container' style={{'display': 'grid', 'grid-template-columns': this.genColumns()}}>
+              {contentsArray.map((elem, ind) => {
+                return <Brick flags={this.state.flags} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.toggleHidden} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
+              })}
+            </div>
           </div>
+          <div className={`setup-menu-${this.state.isSetup}`}>
+          <h2>Game Options</h2>
+          <span>
+            <p>Easy</p>
+            <input id='easy' type='checkbox' onClick={() => this.changeSettings('easy')}></input>
+          </span>
+          <span>
+            <p>Medium</p>
+            <input id='medium' type='checkbox' onClick={() => this.changeSettings('medium')}></input>
+          </span>
+          <span>
+            <p>Hard</p>
+            <input id='hard' type='checkbox' onClick={() => this.changeSettings('hard')}></input>
+          </span>
+        </div>
+        </div>
+      )
+    }
+    else if (this.state.flagOn){
+      return (
+        <div className='App'>
+          <div className='game'>
+            <Header toggleSetup={this.toggleSetup} wonGame={this.state.wonGame} hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
+            <div className='grid-container'  style={{'display': 'grid', 'grid-template-columns': this.genColumns()}}>
+              {contentsArray.map((elem, ind) => {
+                return <Brick flags={this.state.flags} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.placeFlag} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
+              })}
+            </div>
+          </div>
+          <div className={`setup-menu-${this.state.isSetup}`}>
+          <h2>Game Options</h2>
+          <span>
+            <p>Easy</p>
+            <input id='easy' type='checkbox' onClick={() => this.changeSettings('easy')}></input>
+          </span>
+          <span>
+            <p>Medium</p>
+            <input id='medium' type='checkbox' onClick={() => this.changeSettings('medium')}></input>
+          </span>
+          <span>
+            <p>Hard</p>
+            <input id='hard' type='checkbox' onClick={() => this.changeSettings('hard')}></input>
+          </span>
+        </div>
         </div>
       )
     }
     else {
-      if (this.state.hitMine){
-        return (
-          <div className='App'>
-            <div className='game'>
-              <Header toggleSetup={this.toggleSetup} wonGame={this.state.wonGame} hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
-              <div className='grid-container' style={{'display': 'grid', 'grid-template-columns': this.genColumns()}}>
-                {contentsArray.map((elem, ind) => {
-                  return <Brick flags={this.state.flags} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.noToggleHidden} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
-                })}
-              </div>
+      return (
+        <div className='App'>
+          <div className='game'>
+            <Header toggleSetup={this.toggleSetup} wonGame={this.state.wonGame} hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
+            <div className='grid-container'  style={{'display': 'grid', 'grid-template-columns': this.genColumns()}}>
+              {contentsArray.map((elem, ind) => {
+                return <Brick flags={this.state.flags} flagOn={this.state.flagOn} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.toggleHidden} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
+              })}
             </div>
           </div>
-        )
-      }
-      else if (this.state.flagOn){
-        return (
-          <div className='App'>
-            <div className='game'>
-              <Header toggleSetup={this.toggleSetup} wonGame={this.state.wonGame} hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
-              <div className='grid-container'  style={{'display': 'grid', 'grid-template-columns': this.genColumns()}}>
-                {contentsArray.map((elem, ind) => {
-                  return <Brick flags={this.state.flags} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.placeFlag} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
-                })}
-              </div>
-            </div>
-          </div>
-        )
-      }
-      else {
-        return (
-          <div className='App'>
-            <div className='game'>
-              <Header toggleSetup={this.toggleSetup} wonGame={this.state.wonGame} hitMine={this.state.hitMine} numMines={this.state.numMines} minesFlagged={this.state.minesFlagged} boxesArray={boxesArray} newGame={this.newGame} toggleFlag={this.toggleFlag} flag={flag}/>
-              <div className='grid-container'  style={{'display': 'grid', 'grid-template-columns': this.genColumns()}}>
-                {contentsArray.map((elem, ind) => {
-                  return <Brick flags={this.state.flags} flagOn={this.state.flagOn} hiddenArray={this.state.hidden} contentsArray={contentsArray} toggleHidden={this.toggleHidden} index={ind} hidden={this.state.hidden[ind]} key={ind} contents={elem}/>
-                })}
-              </div>
-            </div>
-          </div>
-        )
-      }
+          <div className={`setup-menu-${this.state.isSetup}`}>
+          <h2>Game Options</h2>
+          <span>
+            <p>Easy</p>
+            <input id='easy' type='checkbox' onClick={() => this.changeSettings('easy')}></input>
+          </span>
+          <span>
+            <p>Medium</p>
+            <input id='medium' type='checkbox' onClick={() => this.changeSettings('medium')}></input>
+          </span>
+          <span>
+            <p>Hard</p>
+            <input id='hard' type='checkbox' onClick={() => this.changeSettings('hard')}></input>
+          </span>
+        </div>
+        </div>
+      )
     }
   }
 }

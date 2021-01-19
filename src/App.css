@@ -17,9 +17,13 @@
   padding-bottom: 10px;
 }
 
-.setup-menu {
+.setup-menu-false {
+  display: none;
+}
+
+.setup-menu-true {
   width: 300px;
-  height: 400px;
+  height: 200px;
   background-color: rgb(230, 230, 230);
   border: 1px solid rgb(110, 110, 110);
   display: flex;
@@ -27,7 +31,7 @@
   align-items: center;
 }
 
-.setup-menu > h2 {
+.setup-menu-true > h2 {
   border-bottom: 1px solid rgb(110, 110, 110);
   display: flex;
   align-items: center;
@@ -36,7 +40,7 @@
   padding: 5px;
 }
 
-.setup-menu > span {
+.setup-menu-true > span {
   width: 30%;
   display: flex;
   align-items: center;
